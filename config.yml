@@ -1,0 +1,12 @@
+MySql:
+  port: 3306
+  localhost: 47.120.34.163
+  username: root
+  password: 130561Cr
+  sqlname: totalFunc
+Develop:
+  port: 3306
+  localhost: 47.120.34.163
+  username: root
+  password: 130561Cr
+  sqlname: totalFunc
