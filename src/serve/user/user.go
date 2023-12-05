@@ -57,11 +57,11 @@ func GetUserInfoByPhone(c *gin.Context) {
 		return
 	}
 	friendTableInfo, _ := friends.GetFriendsRelationship(strID, Users.Id)
-
 	type result struct {
 		Relationship string
 		Data         userInfo.UserInfo
 	}
+
 	var r result
 	r.Relationship = friendTableInfo.Relationship
 	r.Data = Users

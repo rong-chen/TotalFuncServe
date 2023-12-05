@@ -9,8 +9,8 @@ func AddFriends(addFriends *Friends) error {
 	return utils.DB.Create(addFriends).Error
 }
 
-func FindAllFriends(userId uuid.UUID) (friendList []Friends) {
-	utils.DB.Where("userId = ?", userId).Find(&friendList)
+func FindAllFriends(userId uuid.UUID, relationship string) (friendList []Friends) {
+	utils.DB.Where("user_id = ? and relationship = ?", userId, relationship).Find(&friendList)
 	return friendList
 }
 

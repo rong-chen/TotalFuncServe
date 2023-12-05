@@ -29,8 +29,7 @@ func APP() *gin.Engine {
 	r.POST("/GetUserInfoByPhone", utils.ValidRequestToken, user.GetUserInfoByPhone)
 	r.POST("/addFriends", utils.ValidRequestToken, friendsServe.AddFriends)
 	r.POST("/updateFriends", utils.ValidRequestToken, friendsServe.UpdateFrinds)
-
-	//r.GET("/getRouter", utils.ValidRequestToken, router.GetRouter)
+	r.GET("/getAllFriends", utils.ValidRequestToken, friendsServe.GetAllFriends)
 	return r
 }
 func Cors() gin.HandlerFunc {

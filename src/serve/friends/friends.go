@@ -2,6 +2,7 @@ package friendsServe
 
 import (
 	"ChatServe/src/model/friends"
+	userInfo "ChatServe/src/model/user"
 	"ChatServe/src/utils"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
@@ -59,4 +60,15 @@ func UpdateFrinds(c *gin.Context) {
 		return
 	}
 	c.JSON(200, utils.BackMessageResp(200, "更新成功"))
+}
+
+func GetAllFriends(c *gin.Context) {
+	id, _ := c.Get("userid")
+	uuidID := (id).(uuid.UUID)
+	userList := friends.FindAllFriends(uuidID, "1")
+	var friendsList []userInfo.UserInfo
+	for i := range userList {
+		friendsList = append(friendsList, userInfo.FindUserInfoByUUID(userList[i].FriendsId))
+	}
+	c.JSON(200, utils.BackDataResp(200, "获取成功", friendsList))
 }

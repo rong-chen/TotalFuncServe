@@ -14,5 +14,6 @@ type UserInfo struct {
 	Sex         int       `json:"sex"  form:"sex"`
 	Birthday    int64     `json:"birthday"  form:"birthday"`
 	Email       string    `json:"email"  form:"email"`
+	State       bool      `json:"state" from:"state" gorm:"default:false;comment:'在线状态'"`
 	Permissions string    `json:"permissions" default:"2"  form:"permissions"`
 }

@@ -1,6 +1,9 @@
 package chat
 
 import (
+	"ChatServe/src/model/chatContent"
+	"ChatServe/src/model/friends"
+	userInfo "ChatServe/src/model/user"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -60,8 +63,23 @@ func Connect(c *gin.Context) {
 	rwLocker.Lock()
 	ConnectMap[uuidUserID] = &node
 	rwLocker.Unlock()
+	// 推送广播给所有已加好友的用户
+	go PushAllFriends(uuidUserID)
 	go recvMsg(node)
 	go sendMsg(node)
+}
+func PushAllFriends(uuid uuid.UUID) {
+	friendList := friends.FindAllFriends(uuid, "1")
+	user := userInfo.FindUserInfoByUUID(uuid)
+	strUser, err := json.Marshal(user)
+	if err != nil {
+		return
+	}
+	for _, f := range friendList {
+		if nodes, ok := ConnectMap[f.FriendsId]; ok {
+			nodes.conn.WriteMessage(websocket.TextMessage, strUser)
+		}
+	}
 }
 
 func recvMsg(node Node) {
@@ -69,6 +87,7 @@ func recvMsg(node Node) {
 	for {
 		msgType, msg, err := node.conn.ReadMessage()
 		if err != nil {
+			node.conn.Close()
 			return
 		}
 		errs := json.Unmarshal(msg, &params)
@@ -79,23 +98,35 @@ func recvMsg(node Node) {
 			}
 		}
 		sendUuid := params.ToUuid
-		uuid, err := uuid.FromString(sendUuid)
+		uuids, err := uuid.FromString(sendUuid)
 		if err != nil {
-
 			e := node.conn.WriteMessage(msgType, []byte(uuidErr))
 			if e != nil {
 				node.conn.Close()
 			}
 		}
-		if nodes, ok := ConnectMap[uuid]; ok {
+		//
+		fid, errs2 := uuid.FromString(params.FromUuid)
+		tid, errs2 := uuid.FromString(params.ToUuid)
+		if errs2 != nil {
+			node.conn.WriteMessage(msgType, []byte(offline))
+		}
+		//消息存储到数据库中
+		var cc chatContent.ChatContent
+		cc.ID = uuid.NewV4()
+		cc.FriendId = tid
+		cc.Content = params.SendMsg
+		cc.UserId = fid
+		err3 := chatContent.CreateChatContent(&cc)
+		if err3 != nil {
+			node.conn.WriteMessage(msgType, []byte("消息存储失败"))
+		}
+		if nodes, ok := ConnectMap[uuids]; ok {
 			//用户在线
 			nodes.msgChan <- msg
 		} else {
 			//否则 //用户不在线
-			e := node.conn.WriteMessage(msgType, []byte(offline))
-			if e != nil {
-				node.conn.Close()
-			}
+			//e := node.conn.WriteMessage(msgType, []byte(offline))
 		}
 	}
 }

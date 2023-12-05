@@ -2,6 +2,7 @@ package main
 
 import (
 	app "ChatServe/src"
+	"ChatServe/src/model/chatContent"
 	"ChatServe/src/model/friends"
 	noteModel "ChatServe/src/model/note"
 	routers "ChatServe/src/model/router"
@@ -25,6 +26,7 @@ func initTable() {
 	utils.DB.AutoMigrate(&noteModel.BlackList{})
 	utils.DB.AutoMigrate(&routers.Router{})
 	utils.DB.AutoMigrate(&friends.Friends{})
+	utils.DB.AutoMigrate(&chatContent.ChatContent{})
 }
 func Viper() {
 	viper.SetConfigName("config")
